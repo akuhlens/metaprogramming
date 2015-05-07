@@ -1,2 +1,5 @@
-# gradual-racket
-The gradually typed lambda calculus as a racket #lang 
+# Metaprogramming
+
+### The GTLC as the racket #lang gtlc
+
+### The GTLC in as a Well Typed Idris Interpreter
