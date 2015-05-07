@@ -1,6 +1,6 @@
-#lang gradual/racket
+#lang gtlc
 
-((lambda (f) (f f 5))
+((lambda ([f : (Dyn Int -> Int)]) (f f 5))
  (lambda (f n)
    (if (= 0 n)
        1

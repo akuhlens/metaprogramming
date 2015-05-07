@@ -1,3 +1,3 @@
-#lang gradual/racket
+#lang gtlc
 
 (lambda ([a : Dyn]) a)
