@@ -99,12 +99,9 @@ using (G : Vect n Ty)
    
   App :  Expr G tf -> Expr G ta -> {auto ar : AppRule tf ra rr} -> 
      {auto cf : consistTy tf (TyFun ra rr)} -> {auto ca : consistTy ta ra} -> Expr G rr
-  App f a {tf} {ra} {rr} {ta} = IApp (ICast f tf (TyFun ra rr)) (ICast a ta ra)
+  App f a {cf} {ca} {tf} {ra} {rr} {ta} = IApp (mkCast f tf (TyFun ra rr) cf) 
+                                               (mkCast a ta ra ca)
     
---  App f x {r} {c}{ta}{ra} = IApp f (ICast x ta ra)
---  App f x {r} {}{ta} = IApp (ICast f TyDyn (TyFun TyDyn TyDyn))
---(ICast x ta TyDyn)
-     
 -- Op is the smart constructor for operators 
 
   Op  : (interpTy oa -> interpTy ob -> interpTy c) -> Expr G aa -> Expr G ab ->
@@ -139,7 +136,7 @@ using (G : Vect n Ty)
     interp env (Var i)         = return (lookup i env)
     interp env (ValI x)        = return x
     interp env (ValB x)        = return x
-    interp env (ICast x r1 r2) = ?interpICast --rtCast r1 r2 !(interp env x)
+    interp env (ICast x r1 r2) = ?ICast --rtCast r1 r2 !(interp env x)
     interp env (ILam b)        = return (\x => interp (x :: env) b)
     interp env (IOp op x y)    = return (op !(interp env x) !(interp env y))
     interp env (IApp f s)      = (!(interp env f) !(interp env s)) 
@@ -194,12 +191,18 @@ t8 : Expr [] TyInt
 t8 = App (LamT TyInt (Var Stop)) (Val 1)
 t9 : Expr [] TyDyn
 t9 = App (Lam (Var Stop)) (ValI 1)
+t10 : Expr [] TyDyn
+t10 = App (Lam (If (Var Stop) (ValI 0) (Var Stop))) (ValI 1)
+
+
+--sub1 : Expr [] (TyFun TyInt TyInt)
+--sub1 = LamT TyInt (Op (-) (Var Stop) (Val 1))
 
 {-
 fact : Expr [] (TyFun TyDyn TyInt)
 fact = (Lam (If (Op (==) (Val 0) (Var Stop))
                 (Val 1)
-                (Op (*) (Var Stop) (App fact (Op (-) (Var Stop) (Val 1))))))
+                (Op (*) (Var Stop) (App fact ))))
 -}
 -- unit tests for the interpreter
 --i0 : Maybe Int
