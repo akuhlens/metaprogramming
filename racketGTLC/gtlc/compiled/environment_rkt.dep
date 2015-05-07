@@ -1,0 +1,1 @@
+("6.1.1" ("b91a510b6128e8b61681edb722d6f91e879f6332" . "d105a19fe3a264e5657c9d8cb2777ce106aef15d") (collects #"racket" #"runtime-config.rkt") (collects #"syntax" #"parse.rkt") (collects #"gtlc" #"types.rkt") (collects #"racket" #"unsafe" #"ops.rkt") (collects #"racket" #"fixnum.rkt") (collects #"racket" #"main.rkt") (collects #"syntax" #"parse" #"private" #"parse-aux.rkt"))
