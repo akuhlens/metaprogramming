@@ -69,12 +69,6 @@ using (G : Vect n Ty)
   mkCast e s t p = (ICast e s t)
 --  mkCast refl s t e = e -- mkCast is really dumb currently
 
-  
--- The source level gradual language
-  Val : {auto p : Ty2T ty t} -> t -> Expr G ty
-  Val {p= i2i} x = ValI x
-  Val {p= b2b} x = ValB x
-
 -- Lam is an unannotated lambda
   Lam : Expr (TyDyn :: G) t -> Expr G (TyFun TyDyn t)
   Lam = ILam
@@ -105,7 +99,8 @@ using (G : Vect n Ty)
 -- Op is the smart constructor for operators 
 
   Op  : (interpTy oa -> interpTy ob -> interpTy c) -> Expr G aa -> Expr G ab ->
-           {auto pa : consistTy aa oa} -> {auto pb : consistTy ab ob} -> Expr G c
+           {auto pa : consistTy aa oa} -> 
+           {auto pb : consistTy ab ob} -> Expr G c
   Op p a b {pa} {aa} {oa} {pb} {ab} {ob}  = IOp p (mkCast a aa oa pa) (mkCast b ab ob pb)  
 
 
@@ -168,9 +163,9 @@ c1 = ValB True
 
 -- unit tests of gradually typed forms 
 t0 : Expr [] TyInt
-t0 = Val 1
+t0 = ValI 1
 t0' : Expr [] TyBool
-t0' = Val True
+t0' = ValB True
 t1 : Expr [] (TyFun TyDyn TyDyn) 
 t1 = Lam (Var Stop)                                    
 t2 : Expr [] (TyFun TyInt TyInt)  
@@ -188,25 +183,38 @@ t7 : Expr [TyDyn] TyDyn
 t7 = (If (Var Stop) (ValI 0) (ValB True))
 -- unit tests for the gradual App smart constructor
 t8 : Expr [] TyInt
-t8 = App (LamT TyInt (Var Stop)) (Val 1)
+t8 = App (LamT TyInt (Var Stop)) (ValI 1)
 t9 : Expr [] TyDyn
 t9 = App (Lam (Var Stop)) (ValI 1)
 t10 : Expr [] TyDyn
 t10 = App (Lam (If (Var Stop) (ValI 0) (Var Stop))) (ValI 1)
 
 
---sub1 : Expr [] (TyFun TyInt TyInt)
---sub1 = LamT TyInt (Op (-) (Var Stop) (Val 1))
+sub1 : Expr [] (TyFun TyInt TyInt)
+sub1 = LamT TyInt (Op (-) (Var Stop) (ValI 1))
+
+zerop : Expr [] (TyFun TyInt TyBool)
+zerop = LamT TyInt (Op (==) (ValI 0) (Var Stop))
+
+--zerod : Expr [] (TyFun TyDyn TyBool)
+--zerod = Lam (Op (==) (ValI 0) (Var Stop))
 
 {-
 fact : Expr [] (TyFun TyDyn TyInt)
-fact = (Lam (If (Op (==) (Val 0) (Var Stop))
-                (Val 1)
-                (Op (*) (Var Stop) (App fact ))))
+fact = (Lam (If (App zerop (Var Stop))
+                (ValI 1)
+                (Op (*) (Var Stop) (App fact (App sub1 (Var Stop))))))
 -}
 -- unit tests for the interpreter
---i0 : Maybe Int
---i0 = (interp [] (ValI 1))
+i0 : Maybe Int
+i0 = (interp [] (ValI 0))
+i0p : i0 = Just 0
+i0p = Refl
+i1 : Maybe Bool
+i1 = (interp [] (ValB True))
+i1p : i1 = Just True
+i1p = Refl
+
 
 --main : IO ()
 --main = putStrLn (show i0)
